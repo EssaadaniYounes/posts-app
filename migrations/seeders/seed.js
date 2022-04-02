@@ -17,15 +17,18 @@ mongoose.connect(process.env.DATABASE_CONNECT)
 //Seeders
 import { generateUsers, deleteUsers } from './data/userSeder.js';
 import { generateCategories, deleteCategories } from './data/categorySeeder.js';
+import { generatePosts, deletePosts } from './data/postSeeder.js';
 
 
 
 const saveAll = async () => {
     await deleteUsers()
     await deleteCategories()
+    await deletePosts()
     console.info("✈🪂 Saving Data, please wait...");
     await generateUsers();
     await generateCategories();
+    await generatePosts();
     console.info("🔥🎉 Data saved succesfully");
 }
 saveAll();

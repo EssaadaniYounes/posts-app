@@ -46,14 +46,11 @@ router.post('/login', async (req, res) => {
 
     if (!user) return res.status(400).send("the password is incorrect");
 
-    const token = await jwt.sign({ name: userExist.name, email: userExist.email }, process.env.TOKEN_SECRET_KEY, { expiresIn: '1min' });
+    const token = await jwt.sign({ name: userExist.name, email: userExist.email }, process.env.TOKEN_SECRET_KEY);
     res.header('token', token);
     res.status(200).send({ message: "You logged in", token: token, data: userExist });
 
 })
 
-router.delete('/', async (req, res) => {
-    const user = await User.deleteMany();
-    res.send('delete Scucessfully');
-})
+
 export default router;
