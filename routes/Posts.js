@@ -30,13 +30,13 @@ router.post('/', verify, async (req, res) => {
         description: req.body.description,
         thumbnail: req.body.thumbnail,
         likes: req.body.likes,
-        publishDate:req.body.publishDate,
+        publishDate: req.body.publishDate,
         author: req.body.author,
         categories: req.body.categories
     });
 
     try {
-         await post.save();
+        await post.save();
         res.status(200).send({
             message: `Post Add Succefuly`
         });
@@ -57,10 +57,11 @@ router.put('/:id', verify, async (req, res) => {
 //delete post
 router.delete('/:id', verify, async (req, res) => {
 
-    const post = await Post.findByIdAndDelete(req.params.id, req.body, (err, post) => {
-        if (err) return res.status(500).send(err);
-    });
-    res.status(200).send("post deleted successfully");
+    const post = await (await Post.find()).filter(c => c._id == req.params.id)
+
+    if (!post.length) return res.status(404).send("post not found");
+    await Post.deleteOne({ _id: req.params.id });
+    return res.status(200).send("Post deleted successfully 👌");
 });
 
 export default router;

@@ -47,10 +47,12 @@ router.put('/:id', verify, async (req, res) => {
 //delete category
 router.delete('/:id', verify, async (req, res) => {
 
-    const category = await Category.findByIdAndDelete(req.params.id, req.body, (err, category) => {
-        if (err) return res.status(500).send(err);
-        return res.status(200).send(req.user);
-    });
+
+    const category = await (await Category.find()).filter(c => c._id == req.params.id)
+
+    if (!category.length) return res.status(404).send("category not found");
+    await Category.deleteOne({ _id: req.params.id });
+    return res.status(200).send("category deleted successfully 👌");
 });
 
 export default router;
