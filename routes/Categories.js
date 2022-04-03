@@ -49,7 +49,7 @@ router.delete('/:id', verify, async (req, res) => {
 
 
     const category = await (await Category.find()).filter(c => c._id == req.params.id)
-
+    
     if (!category.length) return res.status(404).send("category not found");
     await Category.deleteOne({ _id: req.params.id });
     return res.status(200).send("category deleted successfully 👌");

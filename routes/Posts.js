@@ -4,6 +4,7 @@ const router = express.Router();
 import Post from '../migrations/schema/Post.js';
 
 import { verify } from '../middlewares/verify.js';
+import { addPost } from '../validation/post-validation.js';
 
 //get all
 router.get('/', verify, async (req, res) => {
@@ -15,16 +16,27 @@ router.get('/', verify, async (req, res) => {
     }
 });
 
-//get all
+//get post by id
 router.get('/:id', verify, async (req, res) => {
+    //get the current user posts
+    if (req.params.id == "me") {
+        const post = await (await Post.find()).filter(c => c.author == req.user.id);
+
+        if (!post.length) return res.status(404).send('You dont have any post yet!');
+        return res.status(200).send(post);
+    }
     const post = await (await Post.find()).filter(c => c._id == req.params.id);
 
     if (!post.length) return res.status(404).send('The post with the given ID was not found.');
     res.status(200).send(post);
 });
 
+
+
 //Add a new post
 router.post('/', verify, async (req, res) => {
+    const { error } = addPost(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
     const post = new Post({
         title: req.body.title,
         description: req.body.description,
@@ -47,10 +59,10 @@ router.post('/', verify, async (req, res) => {
 })
 
 //update post
-router.put('/:id', verify, async (req, res) => {
-    const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true }, (err, post) => {
-        if (err) return res.status(500).send(err);
-    });
+router.patch('/:id', verify, async (req, res) => {
+    const { error } = addPost(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+    const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.status(200).send(post);
 });
 

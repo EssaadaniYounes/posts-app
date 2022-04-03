@@ -2,8 +2,9 @@ import express from 'express';
 const router = express.Router();
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../migrations/schema/User.js'
+import User from '../migrations/schema/User.js';
 import { registerValidation, loginValidation } from '../validation/user-validation.js'
+
 
 router.post('/register', async (req, res) => {
 
@@ -46,11 +47,12 @@ router.post('/login', async (req, res) => {
 
     if (!user) return res.status(400).send("the password is incorrect");
 
-    const token = await jwt.sign({ name: userExist.name, email: userExist.email }, process.env.TOKEN_SECRET_KEY);
+    const token = await jwt.sign({ id: userExist._id, name: userExist.name, email: userExist.email }, process.env.TOKEN_SECRET_KEY);
     res.header('token', token);
     res.status(200).send({ message: "You logged in", token: token, data: userExist });
 
 })
+
 
 
 export default router;

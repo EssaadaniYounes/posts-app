@@ -32,7 +32,7 @@ export const generatePosts = async () => {
         //create the post
         const post = new Post({
             title: faker.lorem.words(3),
-            description: faker.lorem.text(),
+            description: faker.lorem.text({ min: 50 }),
             thumbnail: faker.image.imageUrl(640, 480),
             likes: faker.datatype.number({ min: 0 }),
             publishDate: faker.date.recent(),
@@ -43,7 +43,7 @@ export const generatePosts = async () => {
             ]//generate random 2 categories 
         });
         await post.save();
-        
+
     }
     console.info("✅✅✅ Categories generated successfully");
 }
