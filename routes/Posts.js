@@ -2,15 +2,24 @@ import express from 'express';
 const router = express.Router();
 
 import Post from '../migrations/schema/Post.js';
+import User from '../migrations/schema/User.js';
 
 import { verify } from '../middlewares/verify.js';
 import { addPost } from '../validation/post-validation.js';
 
 //get all
 router.get('/', verify, async (req, res) => {
-    const posts = await Post.find();
+
+    let authors = [req.user.id];
+    //get friends id list
+    const friends = await User.findById(req.user.id).populate('friends').select('friends -_id');
+
+    await friends.friends.map((friend) => {
+        authors.push(friend._id);
+    })
+    let posts = await Post.find();
     try {
-        res.send(posts);
+        res.send({ authors, posts });
     } catch (error) {
         res.status(400).send(error);
     }
@@ -18,19 +27,17 @@ router.get('/', verify, async (req, res) => {
 
 //get post by id
 router.get('/:id', verify, async (req, res) => {
-    //get the current user posts
-    if (req.params.id == "me") {
-        const post = await (await Post.find()).filter(c => c.author == req.user.id);
-
-        if (!post.length) return res.status(404).send('You dont have any post yet!');
-        return res.status(200).send(post);
-    }
     const post = await (await Post.find()).filter(c => c._id == req.params.id);
 
     if (!post.length) return res.status(404).send('The post with the given ID was not found.');
     res.status(200).send(post);
 });
-
+//get user posts
+router.get('/user/:id', verify, async (req, res) => {
+    //get the user posts by id
+    const posts = await Post.find({ author: req.params.id });
+    return res.status(200).send(posts);
+})
 
 
 //Add a new post
@@ -49,9 +56,7 @@ router.post('/', verify, async (req, res) => {
 
     try {
         await post.save();
-        res.status(200).send({
-            message: `Post Add Succefuly`
-        });
+        res.status(200).send(post);
 
     } catch (error) {
         res.send(error);

@@ -33,7 +33,7 @@ export const generatePosts = async () => {
         const post = new Post({
             title: faker.lorem.words(3),
             description: faker.lorem.text({ min: 50 }),
-            thumbnail: faker.image.imageUrl(640, 480),
+            thumbnail: `${faker.image.nature()}?random=${Math.round(Math.random() * 1000)}`,
             likes: faker.datatype.number({ min: 0 }),
             publishDate: faker.date.recent(),
             author: user.id,

@@ -1,15 +1,17 @@
 import express from 'express';
 const router = express.Router();
+
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../migrations/schema/User.js';
+
 import { registerValidation, loginValidation } from '../validation/user-validation.js'
 
 
 router.post('/register', async (req, res) => {
 
     const isNotValid = registerValidation(req.body);
-    if (isNotValid?.error) return res.status(422).send(isNotValid.error);
+    if (isNotValid?.error) return res.status(400).send(isNotValid.error.details[0].message);
 
     const userExist = await User.findOne({ email: req.body.email });
     if (userExist) return res.status(400).send("The email already exists");
@@ -20,7 +22,8 @@ router.post('/register', async (req, res) => {
     const user = new User({
         name: req.body.name,
         email: req.body.email,
-        password: hashedPassword
+        password: hashedPassword,
+        image: req.body.image
     });
 
     try {
@@ -30,7 +33,13 @@ router.post('/register', async (req, res) => {
                 return;
             }
         })
-        res.status(200).send({ user: user });
+        res.status(200).send({
+            user: {
+                name: req.body.name,
+                email: req.body.email,
+                image: req.body.image
+            }
+        });
     } catch (error) {
         res.status(422).send(error);
     }
@@ -38,11 +47,10 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const isNotValid = loginValidation(req.body);
-    if (isNotValid?.error) return res.status(422).send(isNotValid.error);
+    if (isNotValid?.error) return res.status(400).send(isNotValid.error.details[0].message);
 
     const userExist = await User.findOne({ email: req.body.email });
     if (!userExist) return res.status(400).send("The email doesn't exists");
-
     const user = await bcrypt.compare(req.body.password, userExist.password)
 
     if (!user) return res.status(400).send("the password is incorrect");

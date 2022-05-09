@@ -3,10 +3,10 @@ import Joi from '@hapi/joi';
 
 export const addPost = (data) => {
     const schema = Joi.object({
-        title: Joi
-            .string().min(6).required(),
+        title: Joi.string()
+            .min(6).required(),
         description: Joi.string()
-            .min(50)
+            .min(10)
             .required(),
         thumbnail: Joi.string()
             .required(),
